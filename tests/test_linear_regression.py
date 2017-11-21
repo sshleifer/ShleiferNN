@@ -18,4 +18,5 @@ class TestLinReg(unittest.TestCase):
         self.assertGreater(clf.W[1], 2.)
         coeff_error = (clf.W - ideal_W)
         self.assertGreater(.5, np.median(np.abs(coeff_error)))
+        self.assertGreater(.1, np.median(np.abs(clf.bias)))
 
