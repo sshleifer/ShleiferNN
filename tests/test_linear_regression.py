@@ -11,12 +11,12 @@ class TestLinReg(unittest.TestCase):
         y = 2 * X[:, 0] + 3 * X[:, 1] + np.random.randn(100)
         ideal_W = [2, 3, 0]
         ideal_bias = 0
-        clf = LinReg(n_iters=3)
+        clf = LinReg(n_iters=2)
         clf.fit(X, y)
         self.assertGreater(clf.loss_path[0], clf.loss_path[-1])
         self.assertGreater(clf.W[0], 1.)
         self.assertGreater(clf.W[1], 2.)
         coeff_error = (clf.W - ideal_W)
         self.assertGreater(.5, np.median(np.abs(coeff_error)))
-        self.assertGreater(.1, np.median(np.abs(clf.bias)))
+        self.assertGreater(.2, np.median(np.abs(clf.bias)))
 
