@@ -3,6 +3,7 @@ import torch
 from torch.autograd import Variable
 from torch import FloatTensor
 from tqdm import tqdm
+from torch.nn import Module
 
 from nn.utils import MSE, numerical_gradient
 import torch.nn.functional as F
@@ -85,6 +86,7 @@ class TorchReg(object):
         raise NotImplementedError
 
     def calc_loss(self, y, yhat):
+        '''MSE'''
         loss = (yhat - y).pow(2).sum()
         self.loss_path.append(loss)
         return loss
@@ -116,19 +118,58 @@ class TorchNN(TorchReg):
         n_out = y.data.shape[1]
         self.loss_path = []
         self.coeff_path = []
-        self.W1 = Variable(torch.zeros(n_features, self.n_hidden).type(FloatTensor),
-                          requires_grad=True)
-        self.W2 = Variable(torch.zeros(self.n_hidden, n_out).type(FloatTensor),
-                          requires_grad=True)
-        for _ in tqdm(range(iters), desc='Iters'):
+        self.W1 = Variable(torch.randn(n_features, self.n_hidden).type(FloatTensor),
+                           requires_grad=True)
+        self.W2 = Variable(torch.randn(self.n_hidden, n_out).type(FloatTensor),
+                           requires_grad=True)
+        for iter in tqdm(range(iters), desc='Iters'):
+            self.iter = iter
             yhat = self.forward(X)
             self.loss  = self.calc_loss(y, yhat)
             self.loss.backward()
-            self.W.data -= (self.learning_rate * self.W.grad.data)  # Update)
-            self.coeff_path.append(self.W.data.numpy()[:,0])
-            self.W.grad.data.zero_()
+            update1 = -(self.learning_rate * self.W1.grad.data)
+            update2 = -(self.learning_rate * self.W2.grad.data)
+            if self.iter < 5:
+                print(update1, update2)
+            self.W1.data += update1
+            self.W2.data += update2
+            # self.coeff_path.append(self.W1.data.numpy()[:,0])
+            self.W1.grad.data.zero_()
+            self.W2.grad.data.zero_()
         return self
 
     def forward(self, X):
         x = F.relu(X.mm(self.W1))  # self.forward(X)
         return x.mm(self.W2)
+
+
+class Conv2D(Module):
+    def __init__(self, filter_size=3, stride=0, padding=False):
+        self.filter_size = filter_size
+        self.stride = stride
+        self.padding = padding
+
+    def forward(self, x):
+        x[::self.filter_size, ::self.filter_size]
+
+
+
+class TorchConv(TorchReg):
+    def __init__(self, learning_rate=1e-3, n_hidden=1):
+        self.learning_rate = learning_rate
+        self.n_hidden = n_hidden
+
+
+
+def convolve(a,b):
+    res = []
+    brev = list(reversed(b))
+    for result_idx in range(len(a) + len(b) -1):
+        res.append(0)
+        for a_idx in range(len(a)):
+            if (result_idx - a_idx + 1) > 0:
+                print(result_idx - a_idx + 1)
+                val = (a[a_idx] * brev[result_idx-a_idx+1])
+                print(val)
+                res[result_idx] += val
+    return res

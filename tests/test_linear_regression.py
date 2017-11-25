@@ -58,6 +58,8 @@ def get_assertable_data(torch_obj):
 
 class TestTorchReg(TorchTestCase):
 
+
+
     def assertGreater(self, a, b):
         adata = get_assertable_data(a)
         bdata = get_assertable_data(b)
@@ -96,8 +98,22 @@ class TestTorchReg(TorchTestCase):
         y.add_(X[:, 0] * 2)
         y.add_(X[:, 1] * 3)
         y = y.ge(0).type(FloatTensor)
-        torch_log_reg = TorchLogreg(learning_rate=1e-2, verbose=True).fit(X, y, iters=1000)
+        torch_log_reg = TorchLogreg(learning_rate=1e-2, verbose=True).fit(X, y, iters=100)
         self.assertGreater(torch_log_reg.loss_path[0],
                            torch_log_reg.loss_path[-1])
         self.check_convergence(torch_log_reg, ideal_W=[.4, 8, 0])
+
+    def test_nn(self):
+        n_samples = 100
+        n_features = 3
+        n_out = 1
+        X = Variable(torch.randn(n_samples, n_features).type(FloatTensor), requires_grad=False)
+        y = Variable(torch.randn(n_samples, n_out).type(FloatTensor), requires_grad=False)
+        y.add_(X[:, 0] * 2)
+        y.add_(X[:, 1] * 3)
+        torch_nn = TorchNN(learning_rate=1e-3,  n_hidden=4).fit(X, y, iters=100)
+        self.assertGreater(torch_nn.loss_path[0],
+                           torch_nn.loss_path[-1])
+        # raise ValueError
+        # self.check_convergence(torch_log_reg, ideal_W=[.4, 8, 0])
 
