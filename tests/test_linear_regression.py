@@ -1,13 +1,15 @@
-import numpy as np
-import torch
-from torch.autograd import Variable
-from torch import FloatTensor
 import unittest
 
-from nn.models import LinReg, TorchReg, TorchLogreg, TorchNN
-from nn.utils import eval_numerical_gradient
-from nn.torch_testing_utils import TestCase as TorchTestCase
+import numpy as np
+import torch
 from numpy.testing import assert_array_almost_equal
+from torch import FloatTensor
+from torch.autograd import Variable
+
+from nn.models import LinReg, TorchReg, TorchLogreg, TorchNN
+from nn.torch_testing_utils import TestCase as TorchTestCase
+from nn.utils import eval_numerical_gradient, torch_obj_to_numpy
+
 
 class TestLinReg(unittest.TestCase):
     def _clf_checker(self, clf, ideal_W):
@@ -47,28 +49,18 @@ class TestLinReg(unittest.TestCase):
         vec_grad = eval_numerical_gradient(lambda w: np.sum(X.dot(w)), W)
         self.assertEqual(vec_grad.shape, W.shape)
 
-def get_assertable_data(torch_obj):
-    if isinstance(torch_obj, Variable):
-        return torch_obj.data.numpy()
-    elif hasattr(torch_obj, 'numpy'):
-        return torch_obj.numpy()
-    else:
-        return torch_obj
-
 
 class TestTorchReg(TorchTestCase):
 
 
-
     def assertGreater(self, a, b):
-        adata = get_assertable_data(a)
-        bdata = get_assertable_data(b)
+        adata = torch_obj_to_numpy(a)
+        bdata = torch_obj_to_numpy(b)
         super(TestTorchReg, self).assertGreater(adata, bdata)
 
     def check_convergence(self, clf, ideal_W):
         self.assertGreater(clf.loss_path[0],
                            clf.loss_path[-1])
-        #3, '{} {}'.format(clf.loss_path[0], clf.loss_path[-1]))
         coeffs = clf.W.data.numpy()[:, 0]
         coeff_error = (coeffs - ideal_W)
         self.assertGreater(.5, np.median(np.abs(coeff_error)))

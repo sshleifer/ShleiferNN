@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.misc import derivative
+from torch.autograd import Variable
 
 np.random.seed(seed=42)
 
@@ -40,6 +40,10 @@ def MSE(y, yhat):
 
 
 
-def torch_assert_true(a, b):
-
-    torch.le(clf.loss_path[0], clf.loss_path[-1]).equal(torch.ByteTensor([1]))
+def torch_obj_to_numpy(torch_obj):
+    if isinstance(torch_obj, Variable):
+        return torch_obj.data.numpy()
+    elif hasattr(torch_obj, 'numpy'):
+        return torch_obj.numpy()
+    else:
+        return torch_obj
