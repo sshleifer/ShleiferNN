@@ -5,7 +5,7 @@ from torch import FloatTensor
 import unittest
 
 from nn.models import LinReg, TorchReg, TorchLogreg, TorchNN
-from nn.utils import numerical_gradient, eval_numerical_gradient
+from nn.utils import eval_numerical_gradient
 from nn.torch_testing_utils import TestCase as TorchTestCase
 from numpy.testing import assert_array_almost_equal
 
@@ -35,12 +35,6 @@ class TestLinReg(unittest.TestCase):
             eval_numerical_gradient(np.sum, np.array([1.,2.,3.]), verbose=True),
             np.array([1., 1., 1.])
         )
-
-    def test_numerical_gradient(self):
-        assert_array_almost_equal(
-                eval_numerical_gradient(np.sum, np.array([1., 2., 3.]), verbose=True),
-                np.array([1., 1., 1.])
-            )
 
     @unittest.skipUnless(False, '')
     def test_numerical_gradient_matrix(self):
