@@ -36,16 +36,16 @@ class TestLinReg(unittest.TestCase):
             np.array([1., 1., 1.])
         )
 
-    @unittest.skipUnless(False, '')
+    # @unittest.skipUnless(False, '')
     def test_numerical_gradient_matrix(self):
 
         X = np.random.randn(10, 3)
-        y = 2 * X[:, 0] + 3 * X[:, 1] + np.random.randn(100)
+        y = 2 * X[:, 0] + 3 * X[:, 1] + np.random.randn(10)
         W = np.array([2.0, 2.0, 0])
         loss_fn = lambda w: y - X.dot(W)
         self.assertEqual(loss_fn(W).shape, y.shape)
-        vec_grad = numerical_gradient(lambda w: np.sum(X.dot(w)), W)
-        self.assertEqual(vec_grad.shape, X.shape)
+        vec_grad = eval_numerical_gradient(lambda w: np.sum(X.dot(w)), W)
+        self.assertEqual(vec_grad.shape, W.shape)
 
 def get_assertable_data(torch_obj):
     if isinstance(torch_obj, Variable):
