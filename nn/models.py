@@ -5,7 +5,7 @@ from torch import FloatTensor
 from tqdm import tqdm
 from torch.nn import Module
 
-from nn.utils import MSE, numerical_gradient
+from nn.utils import MSE, eval_numerical_gradient
 import torch.nn.functional as F
 from torch.nn.modules.loss import CrossEntropyLoss
 
@@ -30,10 +30,10 @@ class LinReg(object):
                 # loss = mean_squared_error(y, yhat)
                 # BACKWARD
                 batch_loss = lambda yhat: MSE(y, yhat)
-                dyhat = numerical_gradient(
+                dyhat = eval_numerical_gradient(
                     batch_loss, yhat)
                 partial_forward = lambda W: self.forward(x, W)
-                dW_dyhat = numerical_gradient(partial_forward, self.W)
+                dW_dyhat = eval_numerical_gradient(partial_forward, self.W)
                 dW = dW_dyhat * dyhat  # chain rule
                 # d_W = dyhat * x   # where row is derivative of output WRT weights
                 d_bias = dyhat

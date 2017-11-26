@@ -5,7 +5,7 @@ from torch import FloatTensor
 import unittest
 
 from nn.models import LinReg, TorchReg, TorchLogreg, TorchNN
-from nn.utils import numerical_gradient
+from nn.utils import numerical_gradient, eval_numerical_gradient
 from nn.torch_testing_utils import TestCase as TorchTestCase
 from numpy.testing import assert_array_almost_equal
 
@@ -29,12 +29,18 @@ class TestLinReg(unittest.TestCase):
         self._clf_checker(clf, ideal_W)
         clf.fit(X, y, n_batches=4)
 
-    @unittest.SkipTest
+
+    def test_eval_numerical_gradient(self):
+        assert_array_almost_equal(
+            eval_numerical_gradient(np.sum, np.array([1.,2.,3.]), verbose=True),
+            np.array([1., 1., 1.])
+        )
+
     def test_numerical_gradient(self):
         assert_array_almost_equal(
-            numerical_gradient(np.sum, np.array([1,2,3])),
-            np.ones(3)
-        )
+                eval_numerical_gradient(np.sum, np.array([1., 2., 3.]), verbose=True),
+                np.array([1., 1., 1.])
+            )
 
     @unittest.skipUnless(False, '')
     def test_numerical_gradient_matrix(self):
@@ -114,6 +120,7 @@ class TestTorchReg(TorchTestCase):
         torch_nn = TorchNN(learning_rate=1e-3,  n_hidden=4).fit(X, y, iters=100)
         self.assertGreater(torch_nn.loss_path[0],
                            torch_nn.loss_path[-1])
+
         # raise ValueError
         # self.check_convergence(torch_log_reg, ideal_W=[.4, 8, 0])
 
